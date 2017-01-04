@@ -155,12 +155,15 @@ When.ModuleParameterIsChanging((module, parameter) =>
         
         Modules.WithFeature(SMART_LIGHT_ENABLE).Each((sensor_mod)=>
         {
-          if (module.Instance.Name.StartsWith(sensor_mod.Parameter(MOT_SENSOR_NAME).Value))
+          string fullName = module.Instance.Domain + ":" + module.Instance.Address;
+          Log("14.6-" + module.Instance.Name + " ; " + sensor_mod.Parameter(MOT_SENSOR_NAME).Value + " ; " + fullName);
+
+          if (module.Instance.Name.StartsWith(sensor_mod.Parameter(MOT_SENSOR_NAME).Value) || fullName.StartsWith(sensor_mod.Parameter(MOT_SENSOR_NAME).Value))
           { 
             // sensor_mod is a smart_device enabled module that has a motion sensor associated with it which has just changed to a Status.Level>0 (turned on)
             Log("15-" + sensor_mod.Instance.Name + " ; Event time ; " + module.Parameter("Status.Level").Statistics.History[0].Timestamp.ToLocalTime().ToString("yyyyMMdd HH:mm:ss.fffffff"));
             
-            if (Night && (sensor_mod.IsOfDeviceType("Light") || sensor_mod.IsOfDeviceType("Dimmer")))
+            if (Night && (sensor_mod.IsOfDeviceType("Light") || sensor_mod.IsOfDeviceType("Dimmer") || sensor_mod.IsOfDeviceType("Switch")))
             {  
               // NIGHT
               // Action: Turn light on
@@ -227,7 +230,9 @@ When.ModuleParameterIsChanging((module, parameter) =>
         
         Modules.WithFeature(SMART_LIGHT_ENABLE).Each((sensor_mod)=>
         {
-          if (module.Instance.Name.StartsWith(sensor_mod.Parameter(MOT_SENSOR_NAME).Value) && sensor_mod.Parameter(MOT_DELAY_AFTER_OFF).Value=="TRUE")
+          string fullName = module.Instance.Domain + ":" + module.Instance.Address;
+          if ((module.Instance.Name.StartsWith(sensor_mod.Parameter(MOT_SENSOR_NAME).Value) || fullName.StartsWith(sensor_mod.Parameter(MOT_SENSOR_NAME).Value)) 
+              && sensor_mod.Parameter(MOT_DELAY_AFTER_OFF).Value=="TRUE")
           {
             if (sensor_mod.Parameter("Status.Level").DecimalValue==1)
             {
